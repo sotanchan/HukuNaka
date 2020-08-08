@@ -6,14 +6,18 @@ import glob
 from sklearn.model_selection import train_test_split
 import pickle
 import cv2
+import sys
 
 test_images=glob.glob('test_images/*.*')
+if len(test_images)==0:
+    print('判別する画像がありません')
+    sys.exit()
 #予測モデルの読み込み
 filename='hukushi_nakagawa.sav'
 model = pickle.load(open(filename, 'rb'))
 pca_reload = pickle.load(open("pca.pkl",'rb'))
 
-hukushi_count=0
+nofaces=[]
 
 amount=0
 miss=[]
@@ -64,23 +68,29 @@ for test_image_name in test_images:
 
                     if(test_label==1):
                         answer='福士蒼汰'
-                        hukushi_count+=1
 
 
                     else:
                         answer='中川大志'
                     
-            print(f"{amount}枚目：{answer}")
-        
+            print(f"ファイル名：{test_image_name}\n判定結果：{answer}\n")
+        else:
+            nofaces.append(test_image_name)
             
     except:
         miss.append(test_image_name)
         
 
-score=(hukushi_count/amount)*100
-
-print(f'正答率：{score}%')
 print()
-print("処理が正常に行われなかった画像")
-for i in miss:
-    print(i)
+
+if len(nofaces)>0:
+    print("顔が判定されなかった画像")
+    for i in nofaces:
+        print(i)
+
+print()
+
+if len(miss)>0:
+    print("処理が正常に行われなかった画像")
+    for i in miss:
+        print(i)
